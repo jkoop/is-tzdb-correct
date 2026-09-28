@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>America/Winnipeg timezone check</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 36rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      color: #1a1a1a;
+    }
+    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    p { margin-top: 0; line-height: 1.4; }
+    .zone { font-weight: 600; }
+    .warn { color: #8a1c1c; }
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .lamp {
+      flex: 0 0 auto;
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 50%;
+      background: #bbb;
+    }
+    .lamp.pass { background: #1b8f3a; }
+    .lamp.fail { background: #d11a1a; }
+    .detail { line-height: 1.35; }
+    .detail strong { font-size: 1.05rem; }
+    code { font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+  <h1>America/Winnipeg</h1>
+  <p>
+    Permanent Central Daylight Time (UTC−5) from November 2026.
+    Each circle is the offset at local noon on that date.
+  </p>
+  <p id="zone" class="zone"></p>
+  <div id="results"></div>
+  <script>
+    // Old rules still apply through winter 2025–26. The new rules
+    // keep UTC−5 after the missed fall-back on 2026-11-01.
+    const checks = [
+      { date: "2026-01-01", expected: "-06:00" },
+      { date: "2026-06-01", expected: "-05:00" },
+      { date: "2027-01-01", expected: "-05:00" },
+    ];
+
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const zoneEl = document.getElementById("zone");
+    zoneEl.textContent = "Browser timezone: " + zone;
+    if (zone !== "America/Winnipeg") {
+      zoneEl.classList.add("warn");
+      zoneEl.textContent += " — select America/Winnipeg for a meaningful result";
+    }
+
+    const results = document.getElementById("results");
+    for (const check of checks) {
+      const local = new Date(check.date + "T12:00:00");
+      const iso = local.toISOString();
+      const minutes = local.getTimezoneOffset();
+      const sign = minutes > 0 ? "-" : "+";
+      const abs = Math.abs(minutes);
+      const hh = String(Math.floor(abs / 60)).padStart(2, "0");
+      const mm = String(abs % 60).padStart(2, "0");
+      const actual = sign + hh + ":" + mm;
+      const pass = actual === check.expected;
+
+      const row = document.createElement("div");
+      row.className = "check";
+
+      const lamp = document.createElement("div");
+      lamp.className = "lamp " + (pass ? "pass" : "fail");
+      lamp.setAttribute("role", "img");
+      lamp.setAttribute("aria-label", pass ? "pass" : "fail");
+
+      const detail = document.createElement("div");
+      detail.className = "detail";
+
+      const title = document.createElement("div");
+      const titleStrong = document.createElement("strong");
+      titleStrong.textContent = check.date;
+      title.append(titleStrong, " " + (pass ? "pass" : "fail"));
+
+      const offsetLine = document.createElement("div");
+      offsetLine.textContent = "offset " + actual + " (expected " + check.expected + ")";
+
+      const isoLine = document.createElement("div");
+      const isoCode = document.createElement("code");
+      isoCode.textContent = iso;
+      isoLine.append(isoCode);
+
+      detail.append(title, offsetLine, isoLine);
+      row.append(lamp, detail);
+      results.append(row);
+    }
+  </script>
+</body>
+</html>
