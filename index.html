@@ -33,7 +33,6 @@
     .lamp.fail { background: #d11a1a; }
     .detail { line-height: 1.35; }
     .detail strong { font-size: 1.05rem; }
-    code { font-size: 0.95rem; }
   </style>
 </head>
 <body>
@@ -64,7 +63,6 @@
     const results = document.getElementById("results");
     for (const check of checks) {
       const local = new Date(check.date + "T12:00:00");
-      const iso = local.toISOString();
       const minutes = local.getTimezoneOffset();
       const sign = minutes > 0 ? "-" : "+";
       const abs = Math.abs(minutes);
@@ -92,12 +90,7 @@
       const offsetLine = document.createElement("div");
       offsetLine.textContent = "offset " + actual + " (expected " + check.expected + ")";
 
-      const isoLine = document.createElement("div");
-      const isoCode = document.createElement("code");
-      isoCode.textContent = iso;
-      isoLine.append(isoCode);
-
-      detail.append(title, offsetLine, isoLine);
+      detail.append(title, offsetLine);
       row.append(lamp, detail);
       results.append(row);
     }
